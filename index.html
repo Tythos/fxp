@@ -5,20 +5,26 @@
 		<script type="text/javascript" src="src/d3.js"></script>
 		<script type="text/javascript" src="src/fxp.js"></script>
 		<script type="text/javascript">
+			function load(file) {
+				var xhr = new XMLHttpRequest();
+				var data = {};
+				xhr.addEventListener('load', function() {
+					data = JSON.parse(this.responseText);
+				});
+				xhr.open('GET', file, false);
+				xhr.send();
+				return data;
+			}
+			
 			window.addEventListener("load", function() {
-				var runningChart = fxp.BarChart().barPadding(2);
-				var weatherChart = fxp.BarChart().fillColor("coral");
-				d3.select("#runningHistory")
-					.datum([2,5,4,1,2,6,5])
-					.call(runningChart);
-				d3.select("#weatherHistory")
-					.datum([77,71,82,87,84,78,80,84,86,72,71,68,75,73,80,85,86,80])
-					.call(weatherChart);
+				var svg = document.getElementById('axis');
+				
 			});
 		</script>
 	</head>
 	<body>
-		<div id="weatherHistory"></div>
-		<div id="runningHistory"></div>
+		<table>
+			<tr><td><svg id="axis"/></td></tr>
+		</table>
 	</body>
 </html>
