@@ -77,7 +77,7 @@ module.exports = (function() {
 	var axisAttributes = {
 		xlim: [null, null], // *null* value on either end => axis scales to min/max of data x values
 		ylim: [null, null], // *null* value on either end => axis scales to min/max of data y values
-		title: '', // eventually, it would be nice to support LaTeX markup
+		title: 'Untitled Figure', // eventually, it would be nice to support LaTeX markup
 		xlabel: '', // "
 		ylabel: '', // "
 		xticks: null, // If not null, must be an array of increasing numeric values; setting to [] will disable xticks
@@ -115,6 +115,39 @@ module.exports = (function() {
 		return lim;
 	}
 	
+	function createSvgArea(svg, xy, wh, attrs) {
+		// Creates a <g> area and <rect/> child under the given parent. Returns
+		// <g> element. Attribute assignments are split between the two.
+		var g = setAttributes(document.createElementNS(svgNsUrl, 'g'), {
+			"transform": "translate(" + xy[0] + "," + xy[1] + ")",
+			width: wh[0],
+			height: wh[1]
+		});
+		var r = setAttributes(document.createElementNS(svgNsUrl, 'rect'), {
+			x: 0,
+			y: 0,
+			width: wh[0],
+			height: wh[1]
+		});
+		g.appendChild(setAttributes(r, attrs));
+		svg.appendChild(g);
+		return g;
+	}
+	
+	function makeTitle(area, title) {
+		// An area (g w/ bg rect returned by createSvgArea()) is extended to
+		// include a text element containing the title.
+		var t = document.createElementNS(svgNsUrl, 'text');
+		t.innerHTML = title;
+		area.appendChild(setAttributes(t, {
+			'text-anchor': 'middle',
+			'x': parseFloat(area.getAttribute('width')) * 0.5,
+			'y': area.getAttribute('height'),
+			'font-size': area.getAttribute('height')
+		}));
+		return area;
+	}
+	
 	function axisRender() {
 		// Clear SVG element of all children
 		while (this.children.length > 0) {
@@ -133,13 +166,12 @@ module.exports = (function() {
 		var ylim1 = getLim(this.ylim()[1], this.groups, 1, Math.max);
 		
 		// Define axis areas as <rect/> elements
-		var title = setAttributes(document.createElementNS(svgNsUrl, 'rect'), {
-			'x': pad[3] * width,
-			'y': 0,
-			'width': (1 - (pad[1] + pad[3])) * width,
-			'height': pad[0] * height,
-			'class': 'fxpTitle' // used for CSS styling
-		});
+		var title = makeTitle(createSvgArea(svg,
+			[pad[3] * width, 0],
+			[(1 - (pad[1] + pad[3])) * width, pad[0] * height],
+			{'class': 'fxpTitle'} // used for CSS styling
+		), this.title());
+		
 		var xaxis = setAttributes(document.createElementNS(svgNsUrl, 'rect'), {
 			'x': pad[3] * width,
 			'y': (1 - pad[2]) * height,
@@ -163,8 +195,6 @@ module.exports = (function() {
 		});
 		[title, xaxis, yaxis, graph].forEach(function(val) { svg.appendChild(val); });
 		
-		// Render title
-		
 		// Render x axis, ticks/ticklabels, and grid
 		
 		// Render y axis, ticks/ticklabels, and grid
@@ -180,6 +210,9 @@ module.exports = (function() {
 		svg.render = axisRender;
 		
 		// Render initial axis
+		if (!svg.hasAttribute('xmlns')) {
+			svg.setAttribute('xmlns', svgNsUrl)
+		}
 		svg.render();
 		
 		// Attach plotting methods
