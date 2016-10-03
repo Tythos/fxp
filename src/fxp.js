@@ -39,6 +39,8 @@
 var isExt = typeof(module) == 'undefined';
 if (isExt) { var module = {}; }
 module.exports = (function() {
+	var svgNsUrl = 'http://www.w3.org/2000/svg';
+	
 	function setAttributes(dom, att) {
 		// Assigns attribute field-value pairs to the given DOM element
 		Object.keys(att).forEach(function(val) {
@@ -46,6 +48,7 @@ module.exports = (function() {
 		});
 		return dom;
 	}
+	
 	function assignAttributes(obj, att) {
 		// Assigns the given attributes to the object '_options' property, and
 		// adds accessor closure methods. Ignores if already present. When
@@ -125,12 +128,12 @@ module.exports = (function() {
 		var ylim1 = getLim(this.ylim()[1], this.groups, 1, Math.max);
 		
 		// Define axis areas as <rect/> elements
-		this.appendChild(setAttributes(document.createElement('rect'), {
+		this.appendChild(setAttributes(document.createElementNS(svgNsUrl, 'rect'), {
 			// Title area is 100% width, padding[0]% height
-			'x': 0,
-			'y': 0,
-			'width': this.getAttribute('width'),
-			'height': this.padding()[0] * this.getAttribute('height')
+			'x': '10',
+			'y': '10',
+			'width': '10', // this.getAttribute('width'),
+			'height': '10' // this.padding()[0] * this.getAttribute('height')
 		}));
 		
 		// Render title
@@ -175,7 +178,11 @@ module.exports = (function() {
 		return svg;
 	}
 	
-	return { Axis: axis };
+	// return { Axis: axis }; // release
+	return { // debug
+		Axis: axis,
+		setAttributes: setAttributes,
+		svgNsUrl: svgNsUrl };
 })();
 if (isExt) {
 	fxp = module.exports; 

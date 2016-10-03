@@ -17,14 +17,12 @@
 			}
 			
 			window.addEventListener("load", function() {
-				var svg = document.getElementById('axis');
-				
+				var svg = document.getElementsByTagName('svg')[0];
+				var hx = fxp.Axis(svg);
 			});
 		</script>
 	</head>
 	<body>
-		<svg width="900" height="400">
-			<rect x="10" y="10" width="10" height="10"/>
-		</svg>
+		<svg width="900" height="400"></svg>
 	</body>
 </html>
