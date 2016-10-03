@@ -1,0 +1,22 @@
+/*
+*/
+
+.fxpAxis {
+	border:1px solid #000;
+}
+
+.fxpTitle {
+	fill:#700;
+}
+
+.fxpXaxis {
+	fill:#070;
+}
+
+.fxpYaxis {
+	fill:#007;
+}
+
+.fxpGraph {
+	fill:#777;
+}

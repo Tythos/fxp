@@ -83,7 +83,7 @@ module.exports = (function() {
 		xticks: null, // If not null, must be an array of increasing numeric values; setting to [] will disable xticks
 		yticks: null, // If not null, must be an array of increasing numeric values; setting to [] will disable yticks
 		xticklabels: null, // If not null, must be an array of strings matching the length of *xticks*
-		xticklabels: null, // If not null, must be an array of strings matching the length of *yticks*
+		yticklabels: null, // If not null, must be an array of strings matching the length of *yticks*
 		bgcolor: [1,1,1], // Like all color values, can be a string (3- or 6-character hex), a 3-element numeric array, or a 4-element numeric array
 		fgcolor: [1,1,1], // color (see above)
 		axcolor: [1,1,1], // color (see above)
@@ -91,7 +91,7 @@ module.exports = (function() {
 		showygrid: false,
 		xgridcolor: [0.5,0.5,0.5],
 		ygridcolor: [0.5,0.5,0.5],
-		padding: [0.1,0,0.2,0.2] // top, right, bottom, and left, in % of svg dims
+		padding: [0.1,0.,0.2,0.2] // top, right, bottom, and left, in % of svg dims
 	};
 	
 	var pointGroupAttributes = {
@@ -120,6 +120,11 @@ module.exports = (function() {
 		while (this.children.length > 0) {
 			this.removeChild(this.children[0]);
 		}
+		this.classList.add('fxpAxis');
+		var height = parseFloat(this.getAttribute('height'));
+		var width = parseFloat(this.getAttribute('width'));
+		var pad = this.padding();
+		var svg = this;
 		
 		// Automatically determine axis bound from groups?
 		var xlim0 = getLim(this.xlim()[0], this.groups, 0, Math.min);
@@ -128,13 +133,35 @@ module.exports = (function() {
 		var ylim1 = getLim(this.ylim()[1], this.groups, 1, Math.max);
 		
 		// Define axis areas as <rect/> elements
-		this.appendChild(setAttributes(document.createElementNS(svgNsUrl, 'rect'), {
-			// Title area is 100% width, padding[0]% height
-			'x': '10',
-			'y': '10',
-			'width': '10', // this.getAttribute('width'),
-			'height': '10' // this.padding()[0] * this.getAttribute('height')
-		}));
+		var title = setAttributes(document.createElementNS(svgNsUrl, 'rect'), {
+			'x': pad[3] * width,
+			'y': 0,
+			'width': (1 - (pad[1] + pad[3])) * width,
+			'height': pad[0] * height,
+			'class': 'fxpTitle' // used for CSS styling
+		});
+		var xaxis = setAttributes(document.createElementNS(svgNsUrl, 'rect'), {
+			'x': pad[3] * width,
+			'y': (1 - pad[2]) * height,
+			'width': width * (1 - (pad[1] + pad[3])),
+			'height': pad[2] * height,
+			'class': 'fxpXaxis' // used for CSS styling
+		});
+		var yaxis = setAttributes(document.createElementNS(svgNsUrl, 'rect'), {
+			'x': 0,
+			'y': pad[0] * height,
+			'width': pad[3] * width,
+			'height': (1 - (pad[0] + pad[2])) * height,
+			'class': 'fxpYaxis' // used for CSS styling
+		});
+		var graph = setAttributes(document.createElementNS(svgNsUrl, 'rect'), {
+			'x': pad[3] * width,
+			'y': pad[0] * height,
+			'width': (1 - (pad[1] + pad[3])) * width,
+			'height': (1 - (pad[0] + pad[2])) * height,
+			'class': 'fxpGraph' // used for CSS styling
+		});
+		[title, xaxis, yaxis, graph].forEach(function(val) { svg.appendChild(val); });
 		
 		// Render title
 		
@@ -143,6 +170,7 @@ module.exports = (function() {
 		// Render y axis, ticks/ticklabels, and grid
 		
 		// Render each group within the inner plot space
+		this.groups.forEach(function(group) { group.render(); });
 	}
 	
 	function axis(svg) {
