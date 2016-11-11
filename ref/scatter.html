@@ -1,0 +1,29 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+	<head>
+		<title>FXP Scatter Demonstration</title>
+		<link href="../vis/main.css" rel="stylesheet" type="text/css"></link>
+		<script type="text/javascript" src="../src/fxp.js"></script>
+		<script type="text/javascript">
+			var dataset = [
+				[1, 2, 3, 4, 5, 6, 7, 8],
+				[2, 3, 5, 7, 1.1, 1.3, 1.7, 1.9] ];
+			
+			window.addEventListener('load', function() {
+				var svg = document.getElementsByTagName('svg')[0];
+				var hx = figure(svg, {
+					'title': 'Test Scatter Plot',
+					'xlabel': 'The X Axis'
+				});
+				var ps = hx.scatter(dataset[0], dataset[1], {
+					color: 'r',
+					size: 5
+				});
+				console.log(ps);
+			});
+		</script>
+	</head>
+	<body>
+		<svg width="640" height="480"></svg>
+	</body>
+</html>

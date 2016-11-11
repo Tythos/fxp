@@ -1,0 +1,29 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+	<head>
+		<title>FXP Patch Demonstration</title>
+		<link href="../vis/main.css" rel="stylesheet" type="text/css"></link>
+		<script type="text/javascript" src="../src/fxp.js"></script>
+		<script type="text/javascript">
+			var polyData = [
+				[1,10,10,-1],
+				[-1,-1,10,10] ];
+			
+			window.addEventListener('load', function() {
+				var svg = document.getElementsByTagName('svg')[0];
+				var hx = figure(svg, {
+					'title': 'Test Patch Plot',
+					'xlabel': 'The X Axis'
+				});
+				var ps = hx.patch(polyData[0], polyData[1], {
+					color: [0,0,0.5,0.5],
+					edgecolor: 'k'
+				});
+				console.log(ps);
+			});
+		</script>
+	</head>
+	<body>
+		<svg width="900" height="400"></svg>
+	</body>
+</html>

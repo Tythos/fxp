@@ -1,0 +1,28 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+	<head>
+		<title>Outline Breakdown of FXP Model</title>
+		<link href="../vis/main.css" rel="stylesheet" type="text/css"></link>
+		<link href="../vis/debug.css" rel="stylesheet" type="text/css"></link>
+		<script type="text/javascript" src="../src/fxp.js"></script>
+		<script type="text/javascript">
+			window.addEventListener('load', function() {
+				var svg = document.getElementsByTagName('svg')[0];
+				var m = [0.1,0.2,0.3,0.4];
+				var w = parseInt(svg.getAttribute('width'));
+				var h = parseInt(svg.getAttribute('height'));
+				var xmlns = svg.getAttribute('xmlns');
+				
+				isDebug = true;
+				svg.appendChild(makeSvgArea(w * m[3],       0,              w * (1 - m[1] - m[3]), h * m[0],              ['title']));
+				svg.appendChild(makeSvgArea(w * (1 - m[1]), h * m[0],       w * m[1],              h * (1 - m[0] - m[2]), ['legend']));
+				svg.appendChild(makeSvgArea(w * m[3],       h * (1 - m[2]), w * (1 - m[1] - m[3]), h * m[2],              ['xaxis']));
+				svg.appendChild(makeSvgArea(0,              h * m[0],       w * m[3],              h * (1 - m[0] - m[2]), ['yaxis']));
+				svg.appendChild(makeSvgArea(w * m[3],       h * m[0],       w * (1 - m[1] - m[3]), h * (1 - m[0] - m[2]), ['graph']));
+			});
+		</script>
+	</head>
+	<body>
+		<svg width="900" height="400" xmlns="http://www.w3.org/2000/svg" class="fxpAxis"></svg>
+	</body>
+</html>

@@ -1,0 +1,18 @@
+/*
+*/
+
+g {
+	fill:#fff;
+	font-family:sans-serif;
+}
+
+.fxpGraph {
+}
+
+.fxpFigure text {
+	fill:#000;
+}
+
+.fxpAxis line {
+	stroke:#000;
+}
