@@ -17,6 +17,34 @@
 		});
 		return lhs;
 	};
+	
+	function getByClass(ele, cls) {
+		// Specifically for SVG elements; IE tracks HTML children differently
+		var f = ele.getElementsByClassName;
+		if (typeof(f) == 'undefined') {
+			var result = [];
+			var chi = ele.childNodes;
+			for (var i = 0; i < chi.length; i++) {
+				var ch = chi[i];
+				if (typeof(ch.hasAttribute) == 'function' && ch.hasAttribute('class') && ch.getAttribute('class').indexOf(cls) > -1) {
+					result.push(ch);
+				}
+				result = result.concat(getByClass(ch, cls));
+			}
+			return result;
+		} else {
+			return ele.getElementsByClassName(cls);
+		}
+	}
+	
+	function log10(x) {
+		var f = Math.log10;
+		if (typeof(f) == 'undefined') {
+			return Math.log(x) * Math.LOG10E;
+		} else {
+			return f(x);
+		}
+	}
 
 	// Define default options for each public method
 	var defaults = {
@@ -39,20 +67,29 @@
 		}
 	};
 
-	// Pulled from matplotlib.colors.ColorConverted.cache
+	// Pulled from matplotlib.colors.ColorConverted.cache. Extended with HTML
+	// 4.01 specification color names.
 	var colorNames = {
-		"red": 				[1.0, 0.0, 0.0, 1.0],
-		"firebrick":		[0.7, 0.1, 0.1, 1.0],
-		"magenta": 			[1.0, 0.0, 1.0, 1.0],
-		"cyan": 			[0.0, 1.0, 1.0, 1.0],
-		"yellow": 			[1.0, 1.0, 0.0, 1.0],
-		"blue": 			[0.0, 0.0, 1.0, 1.0],
-		"gray": 			[0.5, 0.5, 0.5, 1.0],
-		"green": 			[0.0, 0.5, 0.0, 1.0],
-		"darkgoldenrod":	[0.7, 0.5, 0.0, 1.0],
-		"white":			[1.0, 1.0, 1.0, 1.0],
-		"purple":			[0.5, 0.0, 0.5, 1.0],
-		"black":			[0.0, 0.0, 0.0, 1.0]
+		"white":         [1.0, 1.0, 1.0, 1.0],
+		"gray":          [0.5, 0.5, 0.5, 1.0],
+		"black":         [0.0, 0.0, 0.0, 1.0],
+		"red":           [1.0, 0.0, 0.0, 1.0],
+		"yellow":        [1.0, 1.0, 0.0, 1.0],
+		"green":         [0.0, 0.5, 0.0, 1.0],
+		"blue":          [0.0, 0.0, 1.0, 1.0],
+		"firebrick":     [0.7, 0.1, 0.1, 1.0],
+		"magenta":       [1.0, 0.0, 1.0, 1.0],
+		"cyan":          [0.0, 1.0, 1.0, 1.0],
+		"darkgoldenrod": [0.7, 0.5, 0.0, 1.0],
+		"purple":        [0.5, 0.0, 0.5, 1.0],
+		"silver":        [0.8, 0.8, 0.8, 1.0], // This and subsequent colors are unique to HTML 4.01
+		"maroon":        [0.5, 0.0, 0.0, 1.0],
+		"olive":         [0.5, 0.5, 0.0, 1.0],
+		"lime":          [0.0, 1.0, 0.0, 1.0],
+		"aqua":          [0.0, 1.0, 1.0, 1.0],
+		"teal":          [0.0, 0.5, 0.5, 1.0],
+		"navy":          [0.0, 0.0, 0.5, 1.0],
+		"fuschia":       [1.0, 0.0, 1.0, 1.0]
 	};
 
 	// Pulled from matplotlib.colors.ColorConverted.colors
@@ -148,16 +185,16 @@
 
 	function getTitle(svg) {
 		// Returns the 'title' SVG group element
-		return svg.getElementsByClassName('fxpTitle')[0];
+		return getByClass(svg, 'fxpTitle')[0];
 	}
 
 	function getAxis(svg, ax) {
 		// Returns the 'x' or 'y' axis SVG group element
 		var axis = null;
 		if (ax.toLowerCase() == 'x') {
-			axis = svg.getElementsByClassName('fxpXaxis')[0];
+			axis = getByClass(svg, 'fxpXaxis')[0];
 		} else if (ax.toLowerCase() == 'y') {
-			axis = svg.getElementsByClassName('fxpYaxis')[0];
+			axis = getByClass(svg, 'fxpYaxis')[0];
 		} else {
 			console.error('Axis character must be "x" or "y"');
 		}
@@ -269,7 +306,7 @@
 				'text-anchor': 'middle',
 				'alignment-baseline': 'central'
 			});
-			t.innerHTML = lbl.join('; ');
+			t.textContent = lbl.join('; ');
 			g.appendChild(t);
 		}
 		return g;
@@ -277,14 +314,14 @@
 
 	function getGraph(svg) {
 		// Returns the graph SVG 'group' element within the given <svg> element.
-		return svg.getElementsByClassName('fxpGraph')[0];
+		return getByClass(svg, 'fxpGraph')[0];
 	}
 
 	function getTicks(lim) {
 		// Returns an array of values at which ticks will be placed,
 		// based on the given limits.
-		var tickMag = Math.log10(lim[1] - lim[0]);
-		var dTick = 10**Math.floor(tickMag);
+		var tickMag = log10(lim[1] - lim[0]);
+		var dTick = Math.pow(10, Math.floor(tickMag));
 		var tLim = [
 			dTick * Math.floor(lim[0] / dTick),
 			dTick * Math.ceil(lim[1] / dTick) ];
@@ -299,7 +336,7 @@
 		// Updates the x-axis with the assigned limits, and re-renders the axis
 		// graphical artifacts (labels, bar, ticks, and tick labels).
 		var hx = getAxis(svg, 'x');
-		while (hx.children.count > 0) {
+		while (hx.childNodes.count > 0) {
 			hx.removeChild(hx.firstChild);
 		}
 		var d = getSvgDims(hx);
@@ -334,10 +371,10 @@
 				'dominant-baseline': 'hanging',
 				'transform': 'translate(' + x + ',' + (0.15 * d[1]) + ')'
 			});
-			t.innerHTML = '' + val;
+			t.textContent = '' + val;
 			hx.appendChild(t);
 		});
-		lbl.innerHTML = svg.xlabel;
+		lbl.textContent = svg.xlabel;
 		hx.appendChild(lbl);
 		hx.appendChild(line);
 	}
@@ -346,7 +383,7 @@
 		// Updates the y-axis with the assigned limits, and re-renders the axis
 		// graphical artifacts (labels, bar, ticks, and tick labels).
 		var hx = getAxis(svg, 'y');
-		while (hx.children.count > 0) {
+		while (hx.childNodes.count > 0) {
 			hx.removeChild(hx.firstChild);
 		}
 		var d = getSvgDims(hx);
@@ -381,10 +418,10 @@
 				'alignment-baseline': 'auto',
 				'transform': 'translate(' + (0.85 * d[0]) + ',' + y + ')rotate(-90)'
 			});
-			t.innerHTML = '' + val;
+			t.textContent = '' + val;
 			hx.appendChild(t);
 		});
-		lbl.innerHTML = svg.ylabel;
+		lbl.textContent = svg.ylabel;
 		hx.appendChild(lbl);
 		hx.appendChild(line);
 	}
@@ -393,7 +430,7 @@
 		// Sets the title of the given figure based on the title property of the
 		// SVG element object.
 		var ht = getTitle(svg);
-		while (ht.children.count > 0) {
+		while (ht.childNodes.length > 0) {
 			ht.removeChild(ht.firstChild);
 		}
 		var d = getSvgDims(ht);
@@ -403,7 +440,7 @@
 			'text-anchor': 'middle',
 			'alignment-baseline': 'central'
 		});
-		t.innerHTML = svg.title;
+		t.textContent = svg.title;
 		ht.appendChild(t);
 	}
 
@@ -459,8 +496,8 @@
 		// PointSeries-type object.
 		var options = ps.copy();
 		var graph = getGraph(svg);
-		var x = [], y = [];
-		[x,y] = points2series(ps.data);
+		var xy = points2series(ps.data);
+		var x = xy[0]; var y = xy[1];
 		var fill = options.color == null ? [0,0,0,1] : getColor(options.color);
 		var stroke = options.edgecolor == null ? [0,0,0,1] : getColor(options.edgecolor);
 		var artifacts = [];
@@ -489,8 +526,8 @@
 		// given LineSeries-type object.
 		var options = ls.copy();
 		var graph = getGraph(svg);
-		var x = [], y = [];
-		[x,y] = points2series(ls.data);
+		var xy = points2series(ls.data);
+		var x = xy[0]; var y = xy[1];
 		var stroke = options.color == null ? [0,0,0,1] : getColor(options.color);
 		var support = options.supportcolor == null ? null : getColor(options.supportcolor);
 		var style = dashPatterns[options.style];

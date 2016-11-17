@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>FXP Multiple Plots Demonstration</title>
+		<link href="../vis/main.css" rel="stylesheet" type="text/css"/>
+		<meta charset="utf-8"/>
+		<script type="text/javascript" src="../src/fxp.js"></script>
+		<script type="text/javascript">
+			var pointData = [
+				[1, 2, 3, 4],
+				[2, 3, 5, 7] ];
+			var lineData = [
+				[1, 2, 3, 4, 5, 6, 7, 8],
+				[2, 3, 5, 7, 1.1, 1.3, 1.7, 1.9] ];
+			var patchData = [
+				[1,5,5,-1],
+				[-1,-1,5,5] ];
+			
+			window.addEventListener('load', function() {
+				var svg = document.getElementsByTagName('svg')[0];
+				var hx = figure(svg, {
+					'title': 'Test of Multiple Plots',
+					'xlabel': 'The X Axis',
+					'ylabel': 'le Axis de Y'
+				});
+				var ps = hx.scatter(pointData[0], pointData[1], {
+					color: 0,
+					size: 11
+				});
+				console.log(ps);
+				var ls = hx.plot(lineData[0], lineData[1], {
+					color: 0.7,
+					style: '-.',
+					supportcolor: [0.0,0.0,0.5,0.2]
+				});
+				console.log(ls);
+				var ps = hx.patch(patchData[0], patchData[1], {
+					color: [1.0,0.0,0.0,0.1],
+					edgecolor: 'fuschia'
+				});
+				console.log(ps);
+			});
+		</script>
+	</head>
+	<body>
+		<svg width="640" height="480"></svg>
+	</body>
+</html>
