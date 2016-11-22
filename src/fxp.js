@@ -64,6 +64,14 @@
 		}, patch: {
 			width: 3,
 			edgecolor: null,
+		}, text: {
+			fontfamily: null,
+			fontsize: null,
+			isitalic: false,
+			isbold: false,
+			isunderline: false,
+			halign: 'middle',
+			valign: 'center'
 		}
 	};
 
@@ -581,7 +589,6 @@
 		var graph = getGraph(svg);
 		var fill = options.color == null ? [0,0,0,1] : getColor(options.color);
 		var stroke = options.edgecolor == null ? [0,0,0,1] : getColor(options.edgecolor);
-		var artifacts = [];
 		
 		// Plot the patch as an SVG <polygon/> element
 		var points = [];
@@ -597,8 +604,28 @@
 			'stroke-width': options.width,
 			'stroke': encodeColor(stroke),
 			'stroke-opacity': stroke[3] });
-		ps.artifacts = p;
+		ps.artifacts = [p];
 		graph.appendChild(p);
+	}
+	
+	function renderText(svg, ts) {
+		// Adds and attaches graphical artifacts to the SVG graph based on the
+		// given TextSeries-type object.
+		var options = ts.copy();
+		var graph = getGraph(svg);
+		var fill = options.color == null ? [0,0,0,1] : getColor(options.color);
+		var artifacts = [];
+		
+		// Add the <text/> element to the graph with the appropriate alignment
+		var t = makeSvgEl('text', {
+			'fill': encodeColor(fill),
+			'fill-opacity': fill[3],
+			'x': xScale(svg, ts.data[0][0]),
+			'y': yScale(svg, ts.data[0][1])
+		});
+		t.textContent = ts.text;
+		ts.artifacts = [t];
+		graph.appendChild(t);
 	}
 
 	function scatter(x, y, options) {
@@ -717,6 +744,33 @@
 		renderPatches(this, ps);
 		return ps;
 	}
+	
+	function text(x, y, txt, options) {
+		// Since there is no range specified in the x,y coordinates alone, we
+		// don't adjust the limits unless they don't exist--in which case, we
+		// use the 0-value axis for that dimension, and twice the coordinate.
+		if (!hasField(this, 'xlim')) {
+			this.xlim = x > 0 ? [0,2*x] : [2*x,0];
+		}
+		if (!hasField(this, 'ylim')) {
+			this.ylim = y > 0 ? [0,2*y] : [2*y,0];
+		}
+		
+		// Determine rendering options
+		if (typeof(options) == 'undefined') { options = {}; }
+		options = overrideObject(defaults.all.concat(defaults.text), options);
+		
+		// Note that, since text doesn't modify the state of the axis, we don't
+		// re-render all series objects. Instead, skip directly to constructing
+		// and rendering the TextSeries object.
+		var ts = options.copy();
+		ts.data = [[x,y]];
+		ts.text = txt;
+		ts.type = 'TextSeries';
+		this.series.push(ts);
+		renderText(this, ts);
+		return ts;
+	}
 
 	function figure(svg, options) {
 		if (typeof(options) == 'undefined') { options = {}; }
@@ -741,6 +795,7 @@
 		svg.scatter = scatter;
 		svg.plot = plot;
 		svg.patch = patch;
+		svg.text = text;
 		
 		return svg;
 	}
