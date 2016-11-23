@@ -132,6 +132,31 @@
 			Math.round(rgba[2] * 255) + ',' +
 			Math.round(rgba[3] * 255) + ')';
 	}
+	
+	function encodeAlign(txt) {
+		// Converts alignments into corresponding SVG <text/> attribute value.
+		// This includes both 'halign' and 'valign' values.
+		txt = txt.toLowerCase();
+		if (['left','center','right'].indexOf(txt) >= 0) {
+			if (txt == 'left') {
+				return {'text-anchor': 'start'};
+			} else if (txt == 'right') {
+				return {'text-anchor': 'end'};
+			} else {
+				return {'text-anchor': 'middle'};
+			}
+		} else if (['top','middle','bottom'].indexOf(txt) >= 0) {
+			if (txt == 'top') {
+				return {'alignment-baseline': 'hanging'};
+			} else if (txt == 'bottom') {
+				return {'alignment-baseline': 'baseline'};
+			} else {
+				return {'alignment-baseline': 'central'};
+			}
+		} else {
+			console.error('Invalid alignment value ("' + txt + '")');
+		}
+	}
 
 	function getColor(colorSpec) {
 		// Converts multiple color specs into a single 4-digit RGBA representation;
@@ -617,12 +642,20 @@
 		var artifacts = [];
 		
 		// Add the <text/> element to the graph with the appropriate alignment
-		var t = makeSvgEl('text', {
+		var attrs = {
 			'fill': encodeColor(fill),
 			'fill-opacity': fill[3],
 			'x': xScale(svg, ts.data[0][0]),
-			'y': yScale(svg, ts.data[0][1])
-		});
+			'y': yScale(svg, ts.data[0][1]),
+			'font-family': options.fontfamily == null ? "inherit" : options.fontfamily,
+			'font-size': options.fontsize == null ? "inherit" : options.fontsize,
+			'font-style': options.isitalic ? "italic" : "normal",
+			'font-weight': options.isbold ? "bold" : "normal",
+			'text-decoration': options.isunderline ? "underline" : "none",
+		};
+		attrs = attrs.concat(encodeAlign(options.halign));
+		attrs = attrs.concat(encodeAlign(options.valign));
+		var t = makeSvgEl('text', attrs);
 		t.textContent = ts.text;
 		ts.artifacts = [t];
 		graph.appendChild(t);
