@@ -17,8 +17,8 @@
 				[-1,-1,5,5] ];
 			
 			window.addEventListener('load', function() {
-				var svg = document.getElementsByTagName('svg')[0];
-				var hx = figure(svg, {
+				svg = document.getElementsByTagName('svg')[0];
+				var hx = document.figure(svg, {
 					'title': 'Test of Multiple Plots',
 					'xlabel': 'The X Axis',
 					'ylabel': 'le Axis de Y'
@@ -39,6 +39,10 @@
 					edgecolor: 'fuschia'
 				});
 				console.log(ps);
+				var ts = hx.text(7, 6, 'This is a test!', {
+					color: 0.7
+				});
+				console.log(ts);
 			});
 		</script>
 	</head>

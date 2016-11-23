@@ -1,6 +1,5 @@
-/* --- UNCOMMENT TO RELEASE AS CLOSURE ---
-(function() { */
-	// Global variables
+(function() {
+	// Module-level variables
 	svgXmlNs = 'http://www.w3.org/2000/svg';
 	isDebug = false;
 
@@ -18,8 +17,10 @@
 		return lhs;
 	};
 	
+	function getMachEps() { return 7/3 - 4/3 - 1; }
+	
 	function getByClass(ele, cls) {
-		// Specifically for SVG elements; IE tracks HTML children differently
+		// Specifically for SVG elements, as IE tracks HTML children differently
 		var f = ele.getElementsByClassName;
 		if (typeof(f) == 'undefined') {
 			var result = [];
@@ -70,8 +71,8 @@
 			isitalic: false,
 			isbold: false,
 			isunderline: false,
-			halign: 'middle',
-			valign: 'center'
+			halign: 'center',
+			valign: 'middle'
 		}
 	};
 
@@ -199,7 +200,6 @@
 				rgba[0] = cs < 0.5 ? 1 - 2 * cs : 0; 			// 1 @ 0, 0 @ 0.5, 0 @ 0
 				rgba[1] = cs < 0.5 ? 2 * cs : 2  - 2 * cs;		// 0 @ 0, 1 @ 0.5, 0 @ 1
 				rgba[2] = cs > 0.5 ? 2 * (cs - 0.5) : 0;		// 0 @ 0, 0 @ 0.5, 1 @ 1
-				console.log(rgba);
 			} else {
 				rgba = null;
 			}
@@ -310,9 +310,11 @@
 		// Creates a new SVG element of the given type and attaches the given
 		// options as attributes.
 		var el = document.createElementNS(svgXmlNs, type);
-		Object.keys(options).forEach(function(key,ndx) {
-			el.setAttribute(key, options[key]);
-		});
+		if (typeof(options) == 'object') {
+			Object.keys(options).forEach(function(key,ndx) {
+				el.setAttribute(key, options[key]);
+			});
+		}
 		return el;
 	}
 
@@ -353,8 +355,13 @@
 	function getTicks(lim) {
 		// Returns an array of values at which ticks will be placed,
 		// based on the given limits.
-		var tickMag = log10(lim[1] - lim[0]);
+		var dLim = lim[1] - lim[0];
+		var tickMag = log10(dLim - getMachEps() * dLim);
 		var dTick = Math.pow(10, Math.floor(tickMag));
+		while (dLim / dTick < 2) {
+			tickMag -= 0.1 * tickMag;
+			dTick = Math.pow(10, Math.floor(tickMag));
+		}
 		var tLim = [
 			dTick * Math.floor(lim[0] / dTick),
 			dTick * Math.ceil(lim[1] / dTick) ];
@@ -377,7 +384,8 @@
 		var lbl = makeSvgEl('text', {
 			'text-anchor': 'middle',
 			'alignment-baseline': 'central',
-			'transform': t
+			'transform': t,
+			'class': 'fxpXlabel'
 		});
 		var line = makeSvgEl('line', {
 			'x1': 0,
@@ -386,7 +394,7 @@
 			'y2': 0
 		});
 		var ticks = getTicks(svg.xlim);
-		svg.xlim = [ticks[0],ticks[ticks.length-1]];
+		//svg.xlim = [ticks[0],ticks[ticks.length-1]];
 		ticks.forEach(function(val,ndx) {
 			var x = xScale(svg, val);
 			if (ndx > 0) {
@@ -424,7 +432,8 @@
 		var lbl = makeSvgEl('text', {
 			'text-anchor': 'middle',
 			'dominant-baseline': 'central',
-			'transform': t + 'rotate(-90)'
+			'transform': t + 'rotate(-90)',
+			'class': 'fxpYlabel'
 		});
 		var line = makeSvgEl('line', {
 			'x1': d[0],
@@ -433,7 +442,7 @@
 			'y2': d[1]
 		});
 		var ticks = getTicks(svg.ylim);
-		svg.ylim = [ticks[0],ticks[ticks.length-1]];
+		//svg.ylim = [ticks[0],ticks[ticks.length-1]];
 		ticks.forEach(function(val,ndx) {
 			var y = yScale(svg, val);
 			if (ndx > 0) {
@@ -520,6 +529,10 @@
 				renderPoints(svg, val);
 			} else if (val.type == 'LineSeries') {
 				renderLines(svg, val);
+			} else if (val.type == 'PatchSeries') {
+				renderPatches(svg, val);
+			} else if (val.type == 'TextSeries') {
+				renderText(svg, val);
 			}
 		});
 	}
@@ -644,6 +657,7 @@
 		// Add the <text/> element to the graph with the appropriate alignment
 		var attrs = {
 			'fill': encodeColor(fill),
+			'style': 'fill:' + encodeColor(fill),
 			'fill-opacity': fill[3],
 			'x': xScale(svg, ts.data[0][0]),
 			'y': yScale(svg, ts.data[0][1]),
@@ -804,6 +818,54 @@
 		renderText(this, ts);
 		return ts;
 	}
+	
+	function setAttribute(key, val) {
+		// The default *setAttribute* method has been renamed *setDomAttribute*.
+		// This *setAttribute* method will, instead, check for any
+		// camel-notation accessors for the given property. If one exists, it
+		// will be invoked instead; otherwise, fall back to *setDomAttribute*.
+		var setterName = 'set' + key[0].toUpperCase() + key.substr(1);
+		if (typeof(this[setterName]) == 'function') {
+			this[setterName](val);
+		} else {
+			this.setDomAttribute(key, val);
+		}
+		return this;
+	}
+	
+	function setXlabel(val) {
+		var xAxis = getAxis(this, 'x');
+		var xLabel = getByClass(xAxis, 'fxpXlabel')[0];
+		xLabel.textContent = val;
+	}
+
+	function setYlabel(val) {
+		var yAxis = getAxis(this, 'y');
+		var yLabel = getByClass(yAxis, 'fxpYlabel')[0];
+		yLabel.textContent = val;
+	}
+	
+	function setXlim(val) {
+		this.xlim = val;
+		clearGroup(getGraph(this));
+		clearGroup(getAxis(this, 'x'));
+		clearGroup(getAxis(this, 'y'));
+		setXAxis(this);
+		setYAxis(this);
+		setTitle(this);
+		repopulate(this);
+	}
+
+	function setYlim(val) {
+		this.ylim = val;
+		clearGroup(getGraph(this));
+		clearGroup(getAxis(this, 'x'));
+		clearGroup(getAxis(this, 'y'));
+		setXAxis(this);
+		setYAxis(this);
+		setTitle(this);
+		repopulate(this);
+	}
 
 	function figure(svg, options) {
 		if (typeof(options) == 'undefined') { options = {}; }
@@ -823,15 +885,45 @@
 		svg.appendChild(makeSvgArea(w * (1 - m[1]), h * m[0],       w * m[1],              h * (1 - m[0] - m[2]), ['legend']));
 		svg.appendChild(makeSvgArea(w * m[3],       h * (1 - m[2]), w * (1 - m[1] - m[3]), h * m[2],              ['axis', 'xaxis']));
 		svg.appendChild(makeSvgArea(0,              h * m[0],       w * m[3],              h * (1 - m[0] - m[2]), ['axis','yaxis']));
-		svg.appendChild(makeSvgArea(w * m[3],       h * m[0],       w * (1 - m[1] - m[3]), h * (1 - m[0] - m[2]), ['graph']));
 		
+		// Set graph w/ overflow / clip area
+		var x = w * m[3];
+		var y = h * m[0];
+		var w = w * (1 - m[1] - m[3]);
+		var h = h * (1 - m[0] - m[2]);
+		var graph = makeSvgArea(x, y, w, h, ['graph']);
+		var clip = makeSvgEl('rect', {
+			x: 0,
+			y: 0,
+			width: w,
+			height: h });
+		var d = makeSvgEl('defs');
+		var cp = makeSvgEl('clipPath', {
+			id: 'fxpGraphClip' });
+		cp.appendChild(clip);
+		d.appendChild(cp);
+		svg.appendChild(d);
+		graph.setAttribute('clip-path', 'url(#fxpGraphClip)');
+		svg.appendChild(graph);
+		
+		// Define plotting interfaces
 		svg.scatter = scatter;
 		svg.plot = plot;
 		svg.patch = patch;
 		svg.text = text;
 		
+		// Define and attach accessors
+		svg.setDomAttribute = svg.setAttribute;
+		svg.setAttribute = setAttribute;
+		svg.setTitle = function(val) {
+			svg.title = val;
+			setTitle(svg); };
+		svg.setXlabel = setXlabel;
+		svg.setYlabel = setYlabel;
+		svg.setXlim = setXlim;
+		svg.setYlim = setYlim;
+		
 		return svg;
 	}
-/* --- UNCOMMENT TO RELEASE AS CLOSURE ---
 	document.figure = figure;
-})();*/
+})();

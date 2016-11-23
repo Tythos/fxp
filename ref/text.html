@@ -12,33 +12,25 @@
 			
 			window.addEventListener('load', function() {
 				var svg = document.getElementsByTagName('svg')[0];
-				var hx = figure(svg, {
+				var hx = document.figure(svg, {
 					'title': 'Test Scatter Plot',
 					'xlabel': 'The X Axis'
 				});
+				var ts = hx.text(3, 4, 'testing', {
+					fontsize: '16pt',
+					fontfamily: 'times-new-roman',
+					isitalic: true,
+					isunderline: true,
+					color: 0.9,
+					valign: 'bottom'
+				});
+				console.log(ts);
 				var ps = hx.scatter(dataset[0], dataset[1], {
 					color: 'r',
 					size: 5
 				});
 				console.log(ps);
-				var ts = hx.text(3, 4, 'testing', {
-					fontsize: '16pt',
-					fontfamily: 'times-new-roman',
-					isitalic: true,
-					isunderline: true
-				});
-				console.log(ts);
 			});
-			
-			/*
-			fontfamily: null,
-			fontsize: null,
-			isitalic: false,
-			isbold: false,
-			isunderline: false,
-			halign: 'left|center|right',
-			valign: 'top|middle|bottom'
-			*/
 		</script>
 	</head>
 	<body>
