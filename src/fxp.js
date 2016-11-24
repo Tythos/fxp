@@ -412,7 +412,7 @@
 				'dominant-baseline': 'hanging',
 				'transform': 'translate(' + x + ',' + (0.15 * d[1]) + ')'
 			});
-			t.textContent = '' + val;
+			t.textContent = val.toFixed(1);
 			hx.appendChild(t);
 		});
 		lbl.textContent = svg.xlabel;
@@ -460,7 +460,7 @@
 				'alignment-baseline': 'auto',
 				'transform': 'translate(' + (0.85 * d[0]) + ',' + y + ')rotate(-90)'
 			});
-			t.textContent = '' + val;
+			t.textContent = val.toFixed(1);
 			hx.appendChild(t);
 		});
 		lbl.textContent = svg.ylabel;
