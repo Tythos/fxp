@@ -1,6 +1,8 @@
 fxp
 ===
 
+.. contents::
+
 Figure / Axis paradigm plotting for easy in-browser, SVG plots in a MATLAB /
 MatPlotLib-like ontology (though slightly streamlined).
 
@@ -113,6 +115,35 @@ edgecolor
 The color of the patch edge. See `Colors`_ for more information on how colors
 can be specified.
 
+Hist
+----
+
+The *hist* method is actually a recursive invocation of the *patch* method. A
+given dataset (an n-element array) is binned and used to render a series of
+patches. Several patch properties can therefore be used here, as well.
+
+color
+~~~~~
+
+The color of the bin patch fill. See `Colors`_ for more information on how
+colors can be specified.
+
+width
+~~~~~
+
+The width of the line forming the edge of the bin patches.
+
+edgecolor
+~~~~~~~~~
+
+The color of the bin patch edgees. See `Colors`_ for more information on how
+colors can be specified.
+
+nBins
+~~~~~
+
+Specifies the number of bins used to group the given dataset. Defaults to 16.
+
 Colors
 ------
 
@@ -137,6 +168,17 @@ MatPlotLib references, and include the following values:
 * 'white'
 * 'purple'
 * 'black'
+
+A number of other color names are also supplied by the HTML 4.01 standard:
+
+ * 'silver'
+ * 'maroon'
+ * 'olive'
+ * 'lime'
+ * 'aqua'
+ * 'teal'
+ * 'navy'
+ * 'fuschia'
 
 A color can also be specified by initial. Supported initials are taken from
 MATLAB and MatPlotLib references, and include the following values:

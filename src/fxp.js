@@ -1,4 +1,4 @@
-(function() {
+/*(function() { // REMOVE THIS LINE'S MULTI-LINE COMMENT TO DEPLOY AS CLOSURE */
 	// Module-level variables
 	svgXmlNs = 'http://www.w3.org/2000/svg';
 	isDebug = false;
@@ -73,6 +73,10 @@
 			isunderline: false,
 			halign: 'center',
 			valign: 'middle'
+		}, hist: {
+			width: 1,
+			edgecolor: null,
+			nBins: 16
 		}
 	};
 
@@ -357,11 +361,7 @@
 		// based on the given limits.
 		var dLim = lim[1] - lim[0];
 		var tickMag = log10(dLim - getMachEps() * dLim);
-		var dTick = Math.pow(10, Math.floor(tickMag));
-		while (dLim / dTick < 2) {
-			tickMag -= 0.1 * tickMag;
-			dTick = Math.pow(10, Math.floor(tickMag));
-		}
+		var dTick = Math.pow(10, Math.floor(tickMag - getMachEps() * tickMag));
 		var tLim = [
 			dTick * Math.floor(lim[0] / dTick),
 			dTick * Math.ceil(lim[1] / dTick) ];
@@ -394,7 +394,7 @@
 			'y2': 0
 		});
 		var ticks = getTicks(svg.xlim);
-		//svg.xlim = [ticks[0],ticks[ticks.length-1]];
+		svg.xlim = [ticks[0],ticks[ticks.length-1]];
 		ticks.forEach(function(val,ndx) {
 			var x = xScale(svg, val);
 			if (ndx > 0) {
@@ -442,7 +442,7 @@
 			'y2': d[1]
 		});
 		var ticks = getTicks(svg.ylim);
-		//svg.ylim = [ticks[0],ticks[ticks.length-1]];
+		svg.ylim = [ticks[0],ticks[ticks.length-1]];
 		ticks.forEach(function(val,ndx) {
 			var y = yScale(svg, val);
 			if (ndx > 0) {
@@ -819,6 +819,47 @@
 		return ts;
 	}
 	
+	function hist(x, options) {
+		// Builds on the patch() method after grouping the given data set
+		if (typeof(options) == 'undefined') { options = {}; }
+		var svg = this;
+		options = overrideObject(defaults.all.concat(defaults.hist), options);
+		var psi = [];
+		var lim = [x.min(),x.max()];
+		var n = options.nBins;
+		var dx = (lim[1] - lim[0]) / n;
+		var bins = []; // a bin entry has lim and pop attributes
+		
+		// Compute bin limits and populations
+		for (var i = 0; i < n; i++) {
+			var low = lim[0] + i * dx;
+			var high = lim[0] + (i + 1) * dx;
+			var pop = 0;
+			x.forEach(function(val,ndx) {
+				if (low < val && val < high) { pop++; }
+			});
+			bins.push({
+				lim: [low,high],
+				size: pop
+			});
+		}
+		
+		// Recurse to patch() method and accumulate patch collections
+		var psi = null;
+		bins.forEach(function(bin,ndx) {
+			var x = [bin.lim[0], bin.lim[1], bin.lim[1], bin.lim[0]];
+			var y = [0, 0, bin.size, bin.size];
+			var ps = svg.patch(x, y, options);
+			if (psi == null) {
+				psi = ps;
+			} else {
+				psi.artifacts.concat(ps.artifacts);
+				psi.data.concat(ps.data);
+			}
+		});
+		return psi;
+	}
+	
 	function setAttribute(key, val) {
 		// The default *setAttribute* method has been renamed *setDomAttribute*.
 		// This *setAttribute* method will, instead, check for any
@@ -911,6 +952,7 @@
 		svg.plot = plot;
 		svg.patch = patch;
 		svg.text = text;
+		svg.hist = hist;
 		
 		// Define and attach accessors
 		svg.setDomAttribute = svg.setAttribute;
@@ -926,4 +968,4 @@
 		return svg;
 	}
 	document.figure = figure;
-})();
+/*})(); // REMOVE THIS MULTI-LINE COMMENT TO DEPLOY AS CLOSURE */
