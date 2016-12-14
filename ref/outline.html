@@ -5,25 +5,25 @@
 		<link href="../vis/main.css" rel="stylesheet" type="text/css"/>
 		<link href="../vis/debug.css" rel="stylesheet" type="text/css"/>
 		<meta charset="utf-8"/>
+		<script type="text/javascript" src="../src/require.js"></script>
 		<script type="text/javascript" src="../src/fxp.js"></script>
 		<script type="text/javascript">
-			window.addEventListener('load', function() {
-				var svg = document.getElementsByTagName('svg')[0];
+			require(['fxp'], function(fxp) {
+				var hf = fxp(document.getElementsByTagName('svg')[0]);
 				var m = [0.1,0.2,0.3,0.4];
-				var w = parseInt(svg.getAttribute('width'));
-				var h = parseInt(svg.getAttribute('height'));
-				var xmlns = svg.getAttribute('xmlns');
+				var w = parseInt(hf.getAttribute('width'));
+				var h = parseInt(hf.getAttribute('height'));
+				var xmlns = hf.getAttribute('xmlns');
 				
-				isDebug = true;
-				svg.appendChild(makeSvgArea(w * m[3],       0,              w * (1 - m[1] - m[3]), h * m[0],              ['title']));
-				svg.appendChild(makeSvgArea(w * (1 - m[1]), h * m[0],       w * m[1],              h * (1 - m[0] - m[2]), ['legend']));
-				svg.appendChild(makeSvgArea(w * m[3],       h * (1 - m[2]), w * (1 - m[1] - m[3]), h * m[2],              ['xaxis']));
-				svg.appendChild(makeSvgArea(0,              h * m[0],       w * m[3],              h * (1 - m[0] - m[2]), ['yaxis']));
-				svg.appendChild(makeSvgArea(w * m[3],       h * m[0],       w * (1 - m[1] - m[3]), h * (1 - m[0] - m[2]), ['graph']));
+				hf.appendChild(hf.makeSvgArea(w * m[3],       0,              w * (1 - m[1] - m[3]), h * m[0],              ['title']));
+				hf.appendChild(hf.makeSvgArea(w * (1 - m[1]), h * m[0],       w * m[1],              h * (1 - m[0] - m[2]), ['legend']));
+				hf.appendChild(hf.makeSvgArea(w * m[3],       h * (1 - m[2]), w * (1 - m[1] - m[3]), h * m[2],              ['xaxis']));
+				hf.appendChild(hf.makeSvgArea(0,              h * m[0],       w * m[3],              h * (1 - m[0] - m[2]), ['yaxis']));
+				hf.appendChild(hf.makeSvgArea(w * m[3],       h * m[0],       w * (1 - m[1] - m[3]), h * (1 - m[0] - m[2]), ['graph']));
 			});
 		</script>
 	</head>
 	<body>
-		<svg width="900" height="400" xmlns="http://www.w3.org/2000/svg" class="fxpAxis"></svg>
+		<svg width="900" height="400" xmlns="http://www.w3.org/2000/hf" class="fxpAxis"></svg>
 	</body>
 </html>

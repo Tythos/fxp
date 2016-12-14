@@ -4,15 +4,15 @@
 		<title>FXP Patch Demonstration</title>
 		<link href="../vis/main.css" rel="stylesheet" type="text/css"/>
 		<meta charset="utf-8"/>
+		<script type="text/javascript" src="../src/require.js"></script>
 		<script type="text/javascript" src="../src/fxp.js"></script>
 		<script type="text/javascript">
-			var polyData = [
-				[1,10,10,-1],
-				[-1,-1,10,10] ];
-			
-			window.addEventListener('load', function() {
+			require(['fxp'], function(fxp) {
+				var polyData = [
+					[1,10,10,-1],
+					[-1,-1,10,10] ];
 				var svg = document.getElementsByTagName('svg')[0];
-				var hx = document.figure(svg, {
+				var hx = fxp(svg, {
 					'title': 'Test Patch Plot',
 					'xlabel': 'The X Axis'
 				});
