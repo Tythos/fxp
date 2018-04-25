@@ -1,4 +1,14 @@
-/*
+/* https://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot
+
+   Once figure/axis handle is initialized, the dependency tree for new series
+   and handle property modifications is, order of update required:
+    #. <svg/> dimensions
+	#. margin
+	#. title, xlabel, ylabel positions
+	#. x/y scales
+	#. x/y axes
+	#. point positions
+	#. line positions
 */
 
 define(function(require, exports, module) {
@@ -12,12 +22,20 @@ define(function(require, exports, module) {
 		this.margin = { top: 0.1, right: 0.0, bottom: 0.2, left: 0.1 };
 		this.series = [];
 		var w = parseInt(this.svg.attr("width"));
+		if (!w) {
+			w = 640;
+			this.svg.attr("width", w + "px");
+		}
 		var h = parseInt(this.svg.attr("height"));
+		if (!h) {
+			h = 480;
+			this.svg.attr("height", h + "px");
+		}
 		
 		var width = w * (1 - this.margin.left - this.margin.right);
 		var height = h * (1 - this.margin.top - this.margin.bottom);
-		this.xScale = d3.scaleLinear().domain([0,0]).range([0, width]);
-		this.yScale = d3.scaleLinear().domain([0,0]).range([height, 0]);
+		this.xScale = d3.scaleLinear().domain([0, 1]).range([0, width]);
+		this.yScale = d3.scaleLinear().domain([0, 1]).range([height, 0]);
 
 		var gLeft = w * this.margin.left;
 		var gTop = h * this.margin.top;
@@ -118,11 +136,12 @@ define(function(require, exports, module) {
 		return series;
 	};
 
-	FXP.prototype.plot = function(data) {
+	FXP.prototype.plot = function(x, y) {
 		/* Adds a line series to the figure. Returns the d3 eelection of all line
 		   segments for any additional modification. Some default styling is included
 		   to make sure it isn't rendered as closed path.
 		*/
+		var data = x.map(function(v, i) { return [v, y[i]]; });
 		this.updateScales(data);
 		this.moveSeries();
 		var series = this.body.append("g")
