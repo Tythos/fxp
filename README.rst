@@ -6,6 +6,11 @@ fxp
 Figure / Axis paradigm plotting for easy in-browser, SVG plots in a MATLAB /
 MatPlotLib-like ontology (though slightly streamlined).
 
+NOTE: The underlying fxp module has been pseudo-forked to a gist (see
+"https://gist.github.com/Tythos/92b7d2c60b3f928e40765e264a510332.js"); the
+jury's out on whether the whole project will be transitioned/packaged in this
+manner, in which case this repository will be delete.
+
 Figure
 ------
 
